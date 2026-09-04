@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +7,7 @@ import '../state/plant_sort.dart';
 import '../state/plant_store.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/plant_row.dart';
+import 'debug_plant_screen.dart';
 import 'plant_detail_screen.dart';
 import 'plant_form_screen.dart';
 
@@ -14,9 +16,8 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   void _openAddForm(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const PlantFormScreen()),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const PlantFormScreen()));
   }
 
   void _openDetail(BuildContext context, Plant plant) {
@@ -32,7 +33,18 @@ class HomeScreen extends StatelessWidget {
     final store = context.watch<PlantStore>();
     final showAddButton = store.isLoaded && store.plants.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: const Text('Planter')),
+      appBar: AppBar(
+        title: const Text('Planter'),
+        actions: [
+          if (kDebugMode)
+            IconButton(
+              tooltip: 'Plant painter lab',
+              icon: const Icon(Icons.science_outlined),
+              onPressed: () =>
+                  Navigator.of(context).pushNamed(DebugPlantScreen.routeName),
+            ),
+        ],
+      ),
       body: _body(context, store),
       floatingActionButton: showAddButton
           ? FloatingActionButton(

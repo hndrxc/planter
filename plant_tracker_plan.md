@@ -53,6 +53,8 @@ the UI, and the changes persist.
 
 ## Milestone 3 — The painter
 
+**Status: Complete (September 3, 2026).**
+
 The distinctive part, and the thing worth demoing.
 
 **Exit criteria:** a slider in a debug screen drags `health` from 1.0 to 0.0 and

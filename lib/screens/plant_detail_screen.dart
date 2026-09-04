@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import '../models/date_format.dart';
 import '../models/due_status.dart';
 import '../models/plant.dart';
+import '../models/plant_health.dart';
 import '../state/plant_store.dart';
 import '../widgets/confirm_delete_dialog.dart';
-import '../widgets/plant_placeholder.dart';
+import '../widgets/plant_artwork.dart';
+import '../widgets/plant_placeholder.dart' show dueColor;
 import '../widgets/water_action.dart';
 import 'plant_form_screen.dart';
 
@@ -36,9 +38,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
 
   void _edit(Plant plant) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => PlantFormScreen(initial: plant),
-      ),
+      MaterialPageRoute<void>(builder: (_) => PlantFormScreen(initial: plant)),
     );
   }
 
@@ -81,7 +81,13 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Center(child: PlantPlaceholder(status: status, size: 120)),
+          Center(
+            child: PlantArtwork(
+              health: healthFromSchedule(plant, store.now),
+              size: 120,
+              semanticLabel: '${plant.name} health illustration',
+            ),
+          ),
           const SizedBox(height: 16),
           if (plant.species.isNotEmpty)
             Text(

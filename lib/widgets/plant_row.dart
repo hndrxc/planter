@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../models/due_status.dart';
 import '../models/plant.dart';
+import '../models/plant_health.dart';
 import '../state/plant_store.dart';
 import 'confirm_delete_dialog.dart';
-import 'plant_placeholder.dart';
+import 'plant_artwork.dart';
+import 'plant_placeholder.dart' show dueColor;
 import 'water_action.dart';
 
 /// One plant in the home list: name, species, and how soon it needs water.
@@ -46,7 +48,10 @@ class PlantRow extends StatelessWidget {
       confirmDismiss: (_) => confirmDelete(context, plant),
       onDismissed: (_) => context.read<PlantStore>().remove(plant.id),
       child: ListTile(
-        leading: PlantPlaceholder(status: status),
+        leading: PlantArtwork(
+          health: healthFromSchedule(plant, now),
+          semanticLabel: '${plant.name} health illustration',
+        ),
         title: Text(plant.name),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

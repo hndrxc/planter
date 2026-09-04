@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'data/plant_repository.dart';
+import 'screens/debug_plant_screen.dart';
 import 'screens/home_screen.dart';
 import 'state/plant_store.dart';
 
@@ -24,6 +26,10 @@ class PlanterApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Planter',
         theme: ThemeData(colorSchemeSeed: Colors.green),
+        routes: {
+          if (kDebugMode)
+            DebugPlantScreen.routeName: (_) => const DebugPlantScreen(),
+        },
         home: const HomeScreen(),
       ),
     );
