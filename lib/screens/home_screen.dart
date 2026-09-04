@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/plant.dart';
 import '../state/plant_sort.dart';
 import '../state/plant_store.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/plant_row.dart';
 import 'plant_detail_screen.dart';
 import 'plant_form_screen.dart';
@@ -29,10 +30,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = context.watch<PlantStore>();
+    final showAddButton = store.isLoaded && store.plants.isNotEmpty;
     return Scaffold(
       appBar: AppBar(title: const Text('Planter')),
       body: _body(context, store),
-      floatingActionButton: store.isLoaded
+      floatingActionButton: showAddButton
           ? FloatingActionButton(
               onPressed: () => _openAddForm(context),
               tooltip: 'Add plant',
@@ -47,7 +49,7 @@ class HomeScreen extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (store.plants.isEmpty) {
-      return const Center(child: Text('No plants yet'));
+      return EmptyState(onAdd: () => _openAddForm(context));
     }
     final now = store.now;
     final plants = sortByUrgency(store.plants, now);
