@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../models/due_status.dart';
 import '../models/plant.dart';
 import 'plant_placeholder.dart';
+import 'water_action.dart';
 
 /// One plant in the home list: name, species, and how soon it needs water.
+/// The drop on the right waters it in one tap.
 class PlantRow extends StatelessWidget {
   const PlantRow({
     super.key,
@@ -38,6 +40,11 @@ class PlantRow extends StatelessWidget {
         ],
       ),
       isThreeLine: plant.species.isNotEmpty,
+      trailing: IconButton(
+        tooltip: 'Water ${plant.name}',
+        icon: const Icon(Icons.water_drop_outlined),
+        onPressed: () => waterPlant(context, plant),
+      ),
       onTap: onTap,
     );
   }
