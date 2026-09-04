@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/plant.dart';
 import '../state/plant_sort.dart';
 import '../state/plant_store.dart';
 import '../widgets/plant_row.dart';
+import 'plant_detail_screen.dart';
 import 'plant_form_screen.dart';
 
 /// The list of plants, most urgent first, with a button to add one.
@@ -16,12 +18,20 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  void _openDetail(BuildContext context, Plant plant) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PlantDetailScreen(plantId: plant.id),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = context.watch<PlantStore>();
     return Scaffold(
       appBar: AppBar(title: const Text('Planter')),
-      body: _body(store),
+      body: _body(context, store),
       floatingActionButton: store.isLoaded
           ? FloatingActionButton(
               onPressed: () => _openAddForm(context),
@@ -32,7 +42,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _body(PlantStore store) {
+  Widget _body(BuildContext context, PlantStore store) {
     if (!store.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -43,8 +53,14 @@ class HomeScreen extends StatelessWidget {
     final plants = sortByUrgency(store.plants, now);
     return ListView.builder(
       itemCount: plants.length,
-      itemBuilder: (context, index) =>
-          PlantRow(plant: plants[index], now: now),
+      itemBuilder: (context, index) {
+        final plant = plants[index];
+        return PlantRow(
+          plant: plant,
+          now: now,
+          onTap: () => _openDetail(context, plant),
+        );
+      },
     );
   }
 }
