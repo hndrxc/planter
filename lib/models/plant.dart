@@ -78,6 +78,78 @@ class Plant {
     );
   }
 
+  /// Serializes to a JSON-compatible map. Dates become ISO-8601 UTC strings.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'species': species,
+        'waterEveryDays': waterEveryDays,
+        'lastWatered': _encodeDate(lastWatered),
+        'history': history.map(_encodeDate).toList(),
+      };
+
+  /// Builds a plant from [json] without throwing.
+  ///
+  /// Missing or malformed fields fall back to sensible defaults: a fresh id,
+  /// a placeholder name, an empty species, the default interval, and an empty
+  /// history. History entries that are not valid dates are dropped. If
+  /// `lastWatered` is unusable it falls back to the most recent history entry,
+  /// and failing that to now.
+  factory Plant.fromJson(Map<String, dynamic> json) {
+    final history = _readDateList(json['history']);
+    return Plant(
+      id: _readString(json['id']) ?? newId(),
+      name: _readString(json['name']) ?? placeholderName,
+      species: _readString(json['species'], allowEmpty: true) ?? '',
+      waterEveryDays: _readInterval(json['waterEveryDays']),
+      lastWatered: _decodeDate(json['lastWatered']) ??
+          (history.isNotEmpty ? history.last : DateTime.now()),
+      history: history,
+    );
+  }
+
+  /// Like [Plant.fromJson], but also tolerates [json] not being an object at
+  /// all, in which case it returns null.
+  static Plant? tryFromJson(Object? json) {
+    if (json is! Map) return null;
+    try {
+      return Plant.fromJson(
+        json.map((key, value) => MapEntry(key.toString(), value)),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Name used when saved data has no usable name.
+  static const placeholderName = 'Unnamed plant';
+
+  static String _encodeDate(DateTime date) => date.toUtc().toIso8601String();
+
+  static DateTime? _decodeDate(Object? value) =>
+      value is String ? DateTime.tryParse(value)?.toLocal() : null;
+
+  static List<DateTime> _readDateList(Object? value) {
+    if (value is! List) return const [];
+    return value.map(_decodeDate).whereType<DateTime>().toList()..sort();
+  }
+
+  static String? _readString(Object? value, {bool allowEmpty = false}) {
+    if (value is! String) return null;
+    if (value.trim().isEmpty && !allowEmpty) return null;
+    return value;
+  }
+
+  static int _readInterval(Object? value) {
+    final parsed = switch (value) {
+      int v => v,
+      num v => v.round(),
+      String v => int.tryParse(v.trim()),
+      _ => null,
+    };
+    return parsed == null || parsed < 1 ? defaultWaterEveryDays : parsed;
+  }
+
   /// A new id for a plant created on this device.
   static String newId() {
     final stamp = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
