@@ -9,6 +9,8 @@ void main() {
     id: 'p1',
     name: 'Monty',
     species: 'Monstera deliciosa',
+    notes: 'Bright, indirect light',
+    potColorIndex: 3,
     waterEveryDays: 7,
     lastWatered: lastWatered,
     history: [
@@ -26,6 +28,8 @@ void main() {
       expect(copy.id, 'p1');
       expect(copy.name, 'Monty');
       expect(copy.species, 'Monstera deliciosa');
+      expect(copy.notes, 'Bright, indirect light');
+      expect(copy.potColorIndex, 3);
       expect(copy.waterEveryDays, 7);
       expect(copy.lastWatered, lastWatered);
       expect(copy.history, plant.history);
@@ -65,8 +69,21 @@ void main() {
         'lastWatered': iso,
       });
       expect(copy.species, '');
+      expect(copy.notes, '');
+      expect(copy.potColorIndex, Plant.defaultPotColorIndex);
       expect(copy.waterEveryDays, Plant.defaultWaterEveryDays);
       expect(copy.history, isEmpty);
+    });
+
+    test('malformed pot colors fall back without breaking old saves', () {
+      for (final bad in [-1, 5, 'blue', null, true]) {
+        expect(
+          Plant.fromJson({'potColorIndex': bad}).potColorIndex,
+          Plant.defaultPotColorIndex,
+          reason: 'for $bad',
+        );
+      }
+      expect(Plant.fromJson({'potColorIndex': '2'}).potColorIndex, 2);
     });
 
     test('a malformed interval falls back to the default', () {
@@ -180,6 +197,8 @@ void main() {
       expect(copy.waterEveryDays, 10);
       expect(copy.id, plant.id);
       expect(copy.species, plant.species);
+      expect(copy.notes, plant.notes);
+      expect(copy.potColorIndex, plant.potColorIndex);
       expect(copy.lastWatered, plant.lastWatered);
       expect(copy.history, plant.history);
     });
@@ -233,6 +252,8 @@ void main() {
         id: 'p1',
         name: 'Monty',
         species: 'Monstera deliciosa',
+        notes: 'Bright, indirect light',
+        potColorIndex: 3,
         waterEveryDays: 7,
         lastWatered: DateTime(2026, 8, 20, 9, 30),
         history: [

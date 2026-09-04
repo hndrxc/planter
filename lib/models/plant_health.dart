@@ -14,3 +14,11 @@ double healthFromSchedule(Plant plant, DateTime now, {int? graceDays}) {
   if (grace <= 0 || overdue >= grace) return 0;
   return (1 - overdue / grace).clamp(0.0, 1.0);
 }
+
+String healthLabel(double health) {
+  final value = health.clamp(0.0, 1.0);
+  if (value >= .75) return 'healthy';
+  if (value >= .4) return 'thirsty';
+  if (value > 0) return 'very thirsty';
+  return 'fully wilted';
+}

@@ -13,18 +13,26 @@ class Plant {
     required this.id,
     required this.name,
     this.species = '',
+    this.notes = '',
+    this.potColorIndex = defaultPotColorIndex,
     this.waterEveryDays = defaultWaterEveryDays,
     required this.lastWatered,
     List<DateTime> history = const [],
-  })  : assert(waterEveryDays >= 1, 'waterEveryDays must be at least 1'),
-        history = List.unmodifiable(history);
+  }) : assert(waterEveryDays >= 1, 'waterEveryDays must be at least 1'),
+       history = List.unmodifiable(history);
 
   /// Interval used when none is given.
   static const defaultWaterEveryDays = 7;
+  static const defaultPotColorIndex = 0;
+  static const potColorCount = 5;
 
   final String id;
   final String name;
   final String species;
+  final String notes;
+
+  /// Index into the app's small, stable pot-color palette.
+  final int potColorIndex;
 
   /// How often the plant should be watered, in days. Always at least 1.
   final int waterEveryDays;
@@ -64,6 +72,8 @@ class Plant {
     String? id,
     String? name,
     String? species,
+    String? notes,
+    int? potColorIndex,
     int? waterEveryDays,
     DateTime? lastWatered,
     List<DateTime>? history,
@@ -72,6 +82,8 @@ class Plant {
       id: id ?? this.id,
       name: name ?? this.name,
       species: species ?? this.species,
+      notes: notes ?? this.notes,
+      potColorIndex: potColorIndex ?? this.potColorIndex,
       waterEveryDays: waterEveryDays ?? this.waterEveryDays,
       lastWatered: lastWatered ?? this.lastWatered,
       history: history ?? this.history,
@@ -80,13 +92,15 @@ class Plant {
 
   /// Serializes to a JSON-compatible map. Dates become ISO-8601 UTC strings.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'species': species,
-        'waterEveryDays': waterEveryDays,
-        'lastWatered': _encodeDate(lastWatered),
-        'history': history.map(_encodeDate).toList(),
-      };
+    'id': id,
+    'name': name,
+    'species': species,
+    'notes': notes,
+    'potColorIndex': potColorIndex,
+    'waterEveryDays': waterEveryDays,
+    'lastWatered': _encodeDate(lastWatered),
+    'history': history.map(_encodeDate).toList(),
+  };
 
   /// Builds a plant from [json] without throwing.
   ///
@@ -101,8 +115,11 @@ class Plant {
       id: _readString(json['id']) ?? newId(),
       name: _readString(json['name']) ?? placeholderName,
       species: _readString(json['species'], allowEmpty: true) ?? '',
+      notes: _readString(json['notes'], allowEmpty: true) ?? '',
+      potColorIndex: _readPotColorIndex(json['potColorIndex']),
       waterEveryDays: _readInterval(json['waterEveryDays']),
-      lastWatered: _decodeDate(json['lastWatered']) ??
+      lastWatered:
+          _decodeDate(json['lastWatered']) ??
           (history.isNotEmpty ? history.last : DateTime.now()),
       history: history,
     );
@@ -150,6 +167,18 @@ class Plant {
     return parsed == null || parsed < 1 ? defaultWaterEveryDays : parsed;
   }
 
+  static int _readPotColorIndex(Object? value) {
+    final parsed = switch (value) {
+      int v => v,
+      num v => v.round(),
+      String v => int.tryParse(v.trim()),
+      _ => null,
+    };
+    return parsed != null && parsed >= 0 && parsed < potColorCount
+        ? parsed
+        : defaultPotColorIndex;
+  }
+
   /// A new id for a plant created on this device.
   static String newId() {
     final stamp = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
@@ -166,19 +195,23 @@ class Plant {
           other.id == id &&
           other.name == name &&
           other.species == species &&
+          other.notes == notes &&
+          other.potColorIndex == potColorIndex &&
           other.waterEveryDays == waterEveryDays &&
           other.lastWatered == lastWatered &&
           listEquals(other.history, history);
 
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        species,
-        waterEveryDays,
-        lastWatered,
-        Object.hashAll(history),
-      );
+    id,
+    name,
+    species,
+    notes,
+    potColorIndex,
+    waterEveryDays,
+    lastWatered,
+    Object.hashAll(history),
+  );
 
   @override
   String toString() =>

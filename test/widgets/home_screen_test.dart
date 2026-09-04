@@ -4,8 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/pump_app.dart';
 
 void main() {
-  testWidgets('lists plants most urgent first with species and due text',
-      (tester) async {
+  testWidgets('lists plants most urgent first with species and due text', (
+    tester,
+  ) async {
     await pumpApp(tester, initial: [monty, lily]);
 
     expect(listTileTitles(tester), ['Lily', 'Monty']);
@@ -13,6 +14,18 @@ void main() {
     expect(find.text('2 days overdue'), findsOneWidget);
     expect(find.text('Monstera'), findsOneWidget);
     expect(find.text('Due in 5 days'), findsOneWidget);
+    expect(find.text('Needs water'), findsOneWidget);
+    expect(find.text('All good'), findsOneWidget);
+  });
+
+  testWidgets('due today belongs in the needs-water section', (tester) async {
+    await pumpApp(
+      tester,
+      initial: [testPlant('due', 'Due', every: 3, lastAgo: 3)],
+    );
+
+    expect(find.text('Needs water'), findsOneWidget);
+    expect(find.text('All good'), findsNothing);
   });
 
   testWidgets('a fresh install shows the seeded demo plants', (tester) async {
@@ -30,8 +43,9 @@ void main() {
     expect(find.text('No plants yet'), findsOneWidget);
   });
 
-  testWidgets('a plant without a species shows only the due text',
-      (tester) async {
+  testWidgets('a plant without a species shows only the due text', (
+    tester,
+  ) async {
     await pumpApp(
       tester,
       initial: [testPlant('x', 'Nameless', every: 2, lastAgo: 1)],

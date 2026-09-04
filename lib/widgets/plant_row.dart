@@ -5,9 +5,9 @@ import '../models/due_status.dart';
 import '../models/plant.dart';
 import '../models/plant_health.dart';
 import '../state/plant_store.dart';
+import '../theme/due_color.dart';
 import 'confirm_delete_dialog.dart';
 import 'plant_artwork.dart';
-import 'plant_placeholder.dart' show dueColor;
 import 'water_action.dart';
 
 /// One plant in the home list: name, species, and how soon it needs water.
@@ -30,6 +30,7 @@ class PlantRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final days = plant.daysUntilDue(now);
     final status = DueStatus.fromDays(days);
+    final health = healthFromSchedule(plant, now);
     final dueStyle = status == DueStatus.ok
         ? null
         : TextStyle(
@@ -49,8 +50,11 @@ class PlantRow extends StatelessWidget {
       onDismissed: (_) => context.read<PlantStore>().remove(plant.id),
       child: ListTile(
         leading: PlantArtwork(
-          health: healthFromSchedule(plant, now),
-          semanticLabel: '${plant.name} health illustration',
+          health: health,
+          potColorIndex: plant.potColorIndex,
+          semanticLabel:
+              '${plant.name}, ${healthLabel(health)}, '
+              '${(health * 100).round()}% health',
         ),
         title: Text(plant.name),
         subtitle: Column(

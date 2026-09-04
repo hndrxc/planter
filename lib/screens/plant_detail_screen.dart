@@ -5,10 +5,12 @@ import '../models/date_format.dart';
 import '../models/due_status.dart';
 import '../models/plant.dart';
 import '../models/plant_health.dart';
+import '../models/plant_statistics.dart';
 import '../state/plant_store.dart';
+import '../theme/app_theme.dart';
+import '../theme/due_color.dart';
 import '../widgets/confirm_delete_dialog.dart';
 import '../widgets/plant_artwork.dart';
-import '../widgets/plant_placeholder.dart' show dueColor;
 import '../widgets/water_action.dart';
 import 'plant_form_screen.dart';
 
@@ -58,6 +60,8 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
     final days = plant.daysUntilDue(store.now);
     final status = DueStatus.fromDays(days);
     final history = plant.history.reversed.toList();
+    final health = healthFromSchedule(plant, store.now);
+    final reliability = reliabilityForPlant(plant);
     final interval = plant.waterEveryDays == 1
         ? 'every day'
         : 'every ${plant.waterEveryDays} days';
@@ -79,13 +83,16 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         children: [
           Center(
             child: PlantArtwork(
-              health: healthFromSchedule(plant, store.now),
+              health: health,
+              potColorIndex: plant.potColorIndex,
               size: 120,
-              semanticLabel: '${plant.name} health illustration',
+              semanticLabel:
+                  '${plant.name}, ${healthLabel(health)}, '
+                  '${(health * 100).round()}% health',
             ),
           ),
           const SizedBox(height: 16),
@@ -110,6 +117,22 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
             style: theme.textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
+          if (plant.notes.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Notes', style: theme.textTheme.titleMedium),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(plant.notes),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: () => waterPlant(context, plant),
@@ -132,6 +155,41 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
                 title: Text(formatDate(date)),
                 subtitle: Text(formatTime(date)),
               ),
+          const SizedBox(height: AppSpacing.md),
+          Semantics(
+            label: reliability.percentage == null
+                ? 'Watering reliability unavailable'
+                : 'Watering reliability '
+                      '${reliability.percentage!.round()} percent',
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    const Icon(Icons.verified_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Watering reliability',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          Text(
+                            reliability.percentage == null
+                                ? 'Record two waterings to calculate it'
+                                : '${reliability.percentage!.round()}% on time · '
+                                      '${reliability.currentStreak} current streak',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

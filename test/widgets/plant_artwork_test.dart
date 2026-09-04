@@ -46,6 +46,10 @@ void main() {
     final healthy = PlantPainter(health: 1);
     expect(healthy.shouldRepaint(PlantPainter(health: 1)), isFalse);
     expect(healthy.shouldRepaint(PlantPainter(health: .5)), isTrue);
+    expect(
+      healthy.shouldRepaint(PlantPainter(health: 1, potColorIndex: 2)),
+      isTrue,
+    );
   });
 }
 

@@ -16,14 +16,15 @@ List<Plant> demoPlants({DateTime? now}) {
     required int every,
     required int lastAgo,
     int count = 4,
-  }) =>
-      [for (var i = count - 1; i >= 0; i--) daysAgo(lastAgo + i * every)];
+  }) => [for (var i = count - 1; i >= 0; i--) daysAgo(lastAgo + i * every)];
 
   return [
     Plant(
       id: 'demo-monstera',
       name: 'Monty',
       species: 'Monstera deliciosa',
+      notes: 'Likes bright, indirect light.',
+      potColorIndex: 0,
       waterEveryDays: 7,
       lastWatered: daysAgo(2),
       history: regular(every: 7, lastAgo: 2),
@@ -32,6 +33,8 @@ List<Plant> demoPlants({DateTime? now}) {
       id: 'demo-pothos',
       name: 'Goldie',
       species: 'Golden pothos',
+      notes: 'Trail the vines along the bookshelf.',
+      potColorIndex: 1,
       waterEveryDays: 5,
       lastWatered: daysAgo(5),
       history: regular(every: 5, lastAgo: 5),
@@ -40,6 +43,8 @@ List<Plant> demoPlants({DateTime? now}) {
       id: 'demo-fern',
       name: 'Fernando',
       species: 'Boston fern',
+      notes: 'Mist when the room feels dry.',
+      potColorIndex: 2,
       waterEveryDays: 3,
       lastWatered: daysAgo(5),
       history: regular(every: 3, lastAgo: 5, count: 5),
@@ -48,6 +53,8 @@ List<Plant> demoPlants({DateTime? now}) {
       id: 'demo-lily',
       name: 'Lily',
       species: 'Peace lily',
+      notes: 'Keep away from direct afternoon sun.',
+      potColorIndex: 3,
       waterEveryDays: 3,
       lastWatered: daysAgo(10),
       history: regular(every: 3, lastAgo: 10, count: 3),

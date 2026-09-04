@@ -7,12 +7,14 @@ class PlantArtwork extends StatelessWidget {
   const PlantArtwork({
     super.key,
     required this.health,
+    this.potColorIndex = 0,
     this.size = 52,
     this.semanticLabel = 'Plant health illustration',
     this.animationDuration = const Duration(milliseconds: 600),
   });
 
   final double health;
+  final int potColorIndex;
   final double size;
   final String semanticLabel;
   final Duration animationDuration;
@@ -31,7 +33,7 @@ class PlantArtwork extends StatelessWidget {
           curve: Curves.easeOutCubic,
           builder: (context, value, _) => CustomPaint(
             key: const ValueKey('plant-custom-paint'),
-            painter: PlantPainter(health: value),
+            painter: PlantPainter(health: value, potColorIndex: potColorIndex),
           ),
         ),
       ),
@@ -41,9 +43,11 @@ class PlantArtwork extends StatelessWidget {
 
 /// Draws a scalable potted plant in a 100-by-120 logical view box.
 class PlantPainter extends CustomPainter {
-  PlantPainter({required double health}) : health = health.clamp(0.0, 1.0);
+  PlantPainter({required double health, this.potColorIndex = 0})
+    : health = health.clamp(0.0, 1.0);
 
   final double health;
+  final int potColorIndex;
 
   static const _leafPositions = <double>[.25, .38, .52, .66, .80, .92];
   static const _shedThreshold = .34;
@@ -188,20 +192,21 @@ class PlantPainter extends CustomPainter {
   }
 
   void _drawPot(Canvas canvas) {
+    final potColor = potColorForIndex(potColorIndex);
     final body = Path()
       ..moveTo(31, 91)
       ..lineTo(69, 91)
       ..lineTo(63, 116)
       ..quadraticBezierTo(50, 120, 37, 116)
       ..close();
-    canvas.drawPath(body, Paint()..color = const Color(0xffba6943));
+    canvas.drawPath(body, Paint()..color = potColor);
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         const Rect.fromLTWH(27, 85, 46, 10),
         const Radius.circular(4),
       ),
-      Paint()..color = const Color(0xffd68157),
+      Paint()..color = _shiftLightness(potColor, .09),
     );
     canvas.drawOval(
       const Rect.fromLTWH(30, 84, 40, 7),
@@ -233,8 +238,28 @@ class PlantPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant PlantPainter oldDelegate) =>
-      oldDelegate.health != health;
+      oldDelegate.health != health ||
+      oldDelegate.potColorIndex != potColorIndex;
 }
+
+const plantPotColors = <Color>[
+  Color(0xffb86f52),
+  Color(0xff607d8b),
+  Color(0xff718b69),
+  Color(0xff85677b),
+  Color(0xffb18a4b),
+];
+
+const plantPotColorNames = <String>[
+  'Terracotta',
+  'Slate blue',
+  'Sage',
+  'Plum',
+  'Ochre',
+];
+
+Color potColorForIndex(int index) =>
+    plantPotColors[index >= 0 && index < plantPotColors.length ? index : 0];
 
 /// A point on a quadratic Bezier curve, sampled with De Casteljau's method.
 @visibleForTesting

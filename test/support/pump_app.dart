@@ -14,6 +14,8 @@ Plant testPlant(
   String id,
   String name, {
   String species = '',
+  String notes = '',
+  int potColorIndex = 0,
   int every = 7,
   int lastAgo = 1,
   int historyCount = 2,
@@ -23,6 +25,8 @@ Plant testPlant(
     id: id,
     name: name,
     species: species,
+    notes: notes,
+    potColorIndex: potColorIndex,
     waterEveryDays: every,
     lastWatered: daysAgo(lastAgo),
     history: [
@@ -35,7 +39,13 @@ Plant testPlant(
 final monty = testPlant('m', 'Monty', species: 'Monstera', lastAgo: 2);
 
 /// Lily is 2 days overdue.
-final lily = testPlant('l', 'Lily', species: 'Peace lily', every: 3, lastAgo: 5);
+final lily = testPlant(
+  'l',
+  'Lily',
+  species: 'Peace lily',
+  every: 3,
+  lastAgo: 5,
+);
 
 /// Pumps the app with an in-memory repository holding [initial] (null means
 /// a fresh install) and waits for it to load.

@@ -78,6 +78,8 @@ the plant visibly wilts, with no snapping or clipping.
 
 ## Milestone 4 — Derived data and stats
 
+**Status: Complete (September 4, 2026).**
+
 Turns a list app into something that computes.
 
 **Exit criteria:** a stats screen that shows numbers the user never typed in.
@@ -93,6 +95,8 @@ Turns a list app into something that computes.
 ---
 
 ## Milestone 5 — Polish and submission
+
+**Status: Complete (September 4, 2026).**
 
 Cut freely from here if you run short on time. Nothing in this list is load-bearing.
 
