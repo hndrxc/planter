@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/due_status.dart';
 import '../models/plant.dart';
+import '../state/plant_store.dart';
+import 'confirm_delete_dialog.dart';
 import 'plant_placeholder.dart';
 import 'water_action.dart';
 
 /// One plant in the home list: name, species, and how soon it needs water.
-/// The drop on the right waters it in one tap.
+/// The drop on the right waters it in one tap; swiping left deletes it after
+/// a confirmation.
 class PlantRow extends StatelessWidget {
   const PlantRow({
     super.key,
@@ -21,31 +25,44 @@ class PlantRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final days = plant.daysUntilDue(now);
     final status = DueStatus.fromDays(days);
     final dueStyle = status == DueStatus.ok
         ? null
         : TextStyle(
-            color: dueColor(status, Theme.of(context).colorScheme),
+            color: dueColor(status, scheme),
             fontWeight: FontWeight.w600,
           );
-    return ListTile(
-      leading: PlantPlaceholder(status: status),
-      title: Text(plant.name),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (plant.species.isNotEmpty) Text(plant.species),
-          Text(dueLabel(days), style: dueStyle),
-        ],
+    return Dismissible(
+      key: ValueKey('plant-row-${plant.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: scheme.errorContainer,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
       ),
-      isThreeLine: plant.species.isNotEmpty,
-      trailing: IconButton(
-        tooltip: 'Water ${plant.name}',
-        icon: const Icon(Icons.water_drop_outlined),
-        onPressed: () => waterPlant(context, plant),
+      confirmDismiss: (_) => confirmDelete(context, plant),
+      onDismissed: (_) => context.read<PlantStore>().remove(plant.id),
+      child: ListTile(
+        leading: PlantPlaceholder(status: status),
+        title: Text(plant.name),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (plant.species.isNotEmpty) Text(plant.species),
+            Text(dueLabel(days), style: dueStyle),
+          ],
+        ),
+        isThreeLine: plant.species.isNotEmpty,
+        trailing: IconButton(
+          tooltip: 'Water ${plant.name}',
+          icon: const Icon(Icons.water_drop_outlined),
+          onPressed: () => waterPlant(context, plant),
+        ),
+        onTap: onTap,
       ),
-      onTap: onTap,
     );
   }
 }
